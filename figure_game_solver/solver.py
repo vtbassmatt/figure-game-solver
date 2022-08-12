@@ -18,7 +18,7 @@ class Cell(Enum):
 class Board:
     def __init__(self):
         # puzzle 46
-        self.base_puzzle = (
+        self._base_puzzle = (
             # first column, bottom to top
             (Cell.Magenta, Cell.Magenta, Cell.Yellow,  Cell.Magenta, Cell.Magenta),
             (Cell.Cyan,    Cell.White,   Cell.Cyan,    Cell.White,   Cell.Magenta),
@@ -27,14 +27,14 @@ class Board:
             # last column, bottom to top
             (Cell.Magenta, Cell.White,   Cell.Magenta, Cell.Cyan,    Cell.Cyan),
         )
-        self.puzzle = ChainMap(dict(enumerate(self.base_puzzle)))
+        self._puzzle = ChainMap(dict(enumerate(self._base_puzzle)))
         self._clicks = []
     
     def _remove_matches(self, column):
         # make a (mutable) copy of the last layer
-        new_layer = { k: list(v) for k, v in self.puzzle.items() }
+        new_layer = { k: list(v) for k, v in self._puzzle.items() }
         # flood-fill adjacent same-color cells with None
-        _flood_fill(new_layer, column, 0, self.puzzle[column][0], None)
+        _flood_fill(new_layer, column, 0, self._puzzle[column][0], None)
         # filter the Nones out
         for col in new_layer.keys():
             new_layer[col] = [x for x in new_layer[col] if x is not None]
@@ -42,24 +42,24 @@ class Board:
     
     def click(self, column):
         "Click on a column to remove the bottom cell and adjacent same-color cells."
-        if len(self.puzzle[column]) == 0:
+        if len(self._puzzle[column]) == 0:
             raise EmptyColumn(column)
         self._clicks.append(column)
         new_layer = self._remove_matches(column)
-        self.puzzle = self.puzzle.new_child(new_layer)
+        self._puzzle = self._puzzle.new_child(new_layer)
     
     def unclick(self):
         "Remove the last click."
-        if len(self.puzzle.maps) > 1:
+        if len(self._puzzle.maps) > 1:
             self._clicks.pop()
-            self.puzzle = self.puzzle.parents
+            self._puzzle = self._puzzle.parents
         else:
             raise IndexError("There's nothing to unclick")
     
     def is_solved(self):
         "Determine if the puzzle has been solved."
-        for row in self.puzzle:
-            if len(self.puzzle[row]) > 0:
+        for row in self._puzzle:
+            if len(self._puzzle[row]) > 0:
                 return False
         return True
     
@@ -68,12 +68,12 @@ class Board:
             return list(self._clicks)
     
     def print(self):
-        cols = len(self.base_puzzle)
-        rows = len(self.base_puzzle[0])
+        cols = len(self._base_puzzle)
+        rows = len(self._base_puzzle[0])
         for row in range(rows - 1, -1, -1):
             for col in range(cols):
                 try:
-                    match self.puzzle[col][row]:
+                    match self._puzzle[col][row]:
                         case Cell.Magenta:
                             char = '🔺'
                         case Cell.Yellow:
