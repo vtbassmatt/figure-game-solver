@@ -30,6 +30,14 @@ class Board:
         self._puzzle = ChainMap(dict(enumerate(self._base_puzzle)))
         self._clicks = []
     
+    @property
+    def cols(self):
+        return len(self._base_puzzle)
+    
+    @property
+    def rows(self):
+        return len(self._base_puzzle[0])
+    
     def _remove_matches(self, column):
         # make a (mutable) copy of the last layer
         new_layer = { k: list(v) for k, v in self._puzzle.items() }
@@ -65,9 +73,8 @@ class Board:
         return True
     
     @property
-    def solution(self):
-        if self.is_solved:
-            return list(self._clicks)
+    def current_path(self):
+        return list(self._clicks)
     
     def print(self):
         cols = len(self._base_puzzle)
@@ -88,6 +95,43 @@ class Board:
                 except IndexError:
                     print('  ', end='')
             print('')
+
+
+class Solver:
+    def __init__(self, board: Board):
+        self._board = board
+        self._solutions = []
+        self._shortest_solution = board.cols * board.rows
+
+    def find_solutions(self, max_length: int):
+        self._find_solutions(0, max_length)
+    
+    def _find_solutions(self, depth, max_depth):
+        if depth > max_depth: return
+
+        b = self._board
+        for col in range(b.cols):
+            for _ in range(b.rows):
+
+                # we might have found a shorter solution in the last
+                # iteration, so we return from inside the loop
+                if depth >= self._shortest_solution:
+                    return
+
+                try:
+                    b.click(col)
+                except EmptyColumn:
+                    continue
+
+                if b.is_solved:
+                    if len(b.current_path) < self._shortest_solution:
+                        print(b.current_path)
+                        self._solutions.append(b.current_path)
+                        self._shortest_solution = len(b.current_path)
+                else:
+                    self._find_solutions(depth+1, max_depth)
+
+                b.unclick()
 
 
 def _flood_fill(grid, col, row, match, to):
