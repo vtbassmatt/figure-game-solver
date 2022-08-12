@@ -13,4 +13,3 @@ if __name__ == '__main__':
     b.click(0)
     b.print()
     print()
-    b.click(0)

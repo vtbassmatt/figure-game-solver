@@ -27,20 +27,24 @@ class Board:
             # last column, bottom to top
             (Cell.Magenta, Cell.White,   Cell.Magenta, Cell.Cyan,    Cell.Cyan),
         )
-        self.puzzle = ChainMap(self.base_puzzle)
+        self.puzzle = ChainMap(dict(enumerate(self.base_puzzle)))
     
     def _remove_matches(self, column):
-        for i in range(1, len(self.puzzle[column])):
-            if self.puzzle[column][i] != self.puzzle[column][0]:
-                return self.puzzle[column][i:]
-        return []
+        # make a (mutable) copy of the last layer
+        new_layer = { k: list(v) for k, v in self.puzzle.items() }
+        # flood-fill adjacent same-color cells with None
+        _flood_fill(new_layer, column, 0, self.puzzle[column][0], None)
+        # filter the Nones out
+        for col in new_layer.keys():
+            new_layer[col] = [x for x in new_layer[col] if x is not None]
+        return new_layer
     
     def click(self, column):
-        "Click on a column to remove the bottom cell and same-column same-color cells."
+        "Click on a column to remove the bottom cell and adjacent same-color cells."
         if len(self.puzzle[column]) == 0:
             raise EmptyColumn(column)
-        new_col = self._remove_matches(column)
-        self.puzzle = self.puzzle.new_child({column: new_col})
+        new_layer = self._remove_matches(column)
+        self.puzzle = self.puzzle.new_child(new_layer)
     
     def unclick(self):
         "Remove the last click."
@@ -68,3 +72,16 @@ class Board:
                 except IndexError:
                     print('  ', end='')
             print('')
+
+
+def _flood_fill(grid, col, row, match, to):
+    if grid[col][row] == match:
+        grid[col][row] = to
+        if col > 0:
+            _flood_fill(grid, col - 1, row, match, to)
+        if col < len(grid) - 1:
+            _flood_fill(grid, col + 1, row, match, to)
+        if row > 0:
+            _flood_fill(grid, col, row - 1, match, to)
+        if row < len(grid[col]) - 1:
+            _flood_fill(grid, col, row + 1, match, to)
