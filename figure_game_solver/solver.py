@@ -1,6 +1,13 @@
 from collections import ChainMap
 from enum import Enum, auto
 
+
+class EmptyColumn(UserWarning):
+    def __init__(self, column=None):
+        if column:
+            self.column = column
+
+
 class Cell(Enum):
     Magenta = auto()
     Yellow = auto()
@@ -30,6 +37,8 @@ class Board:
     
     def click(self, column):
         "Click on a column to remove the bottom cell and same-column same-color cells."
+        if len(self.puzzle[column]) == 0:
+            raise EmptyColumn(column)
         new_col = self._remove_matches(column)
         self.puzzle = self.puzzle.new_child({column: new_col})
     
