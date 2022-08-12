@@ -53,6 +53,13 @@ class Board:
         else:
             raise IndexError("There's nothing to unclick")
     
+    def is_solved(self):
+        "Determine if the puzzle has been solved."
+        for row in self.puzzle:
+            if len(self.puzzle[row]) > 0:
+                return False
+        return True
+    
     def print(self):
         cols = len(self.base_puzzle)
         rows = len(self.base_puzzle[0])
