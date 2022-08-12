@@ -75,7 +75,7 @@ class Board:
 
 
 def _flood_fill(grid, col, row, match, to):
-    if grid[col][row] == match:
+    if len(grid[col]) > row and grid[col][row] == match:
         grid[col][row] = to
         if col > 0:
             _flood_fill(grid, col - 1, row, match, to)
