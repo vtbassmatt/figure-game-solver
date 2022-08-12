@@ -28,6 +28,7 @@ class Board:
             (Cell.Magenta, Cell.White,   Cell.Magenta, Cell.Cyan,    Cell.Cyan),
         )
         self.puzzle = ChainMap(dict(enumerate(self.base_puzzle)))
+        self._clicks = []
     
     def _remove_matches(self, column):
         # make a (mutable) copy of the last layer
@@ -43,12 +44,14 @@ class Board:
         "Click on a column to remove the bottom cell and adjacent same-color cells."
         if len(self.puzzle[column]) == 0:
             raise EmptyColumn(column)
+        self._clicks.append(column)
         new_layer = self._remove_matches(column)
         self.puzzle = self.puzzle.new_child(new_layer)
     
     def unclick(self):
         "Remove the last click."
         if len(self.puzzle.maps) > 1:
+            self._clicks.pop()
             self.puzzle = self.puzzle.parents
         else:
             raise IndexError("There's nothing to unclick")
@@ -59,6 +62,10 @@ class Board:
             if len(self.puzzle[row]) > 0:
                 return False
         return True
+    
+    def solution(self):
+        if self.is_solved():
+            return list(self._clicks)
     
     def print(self):
         cols = len(self.base_puzzle)

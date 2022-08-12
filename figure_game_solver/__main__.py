@@ -43,3 +43,4 @@ if __name__ == '__main__':
     b.click(4)
     b.print()
     print(b.is_solved())
+    print(b.solution())
