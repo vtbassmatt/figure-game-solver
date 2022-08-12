@@ -56,6 +56,7 @@ class Board:
         else:
             raise IndexError("There's nothing to unclick")
     
+    @property
     def is_solved(self):
         "Determine if the puzzle has been solved."
         for row in self._puzzle:
@@ -63,8 +64,9 @@ class Board:
                 return False
         return True
     
+    @property
     def solution(self):
-        if self.is_solved():
+        if self.is_solved:
             return list(self._clicks)
     
     def print(self):
