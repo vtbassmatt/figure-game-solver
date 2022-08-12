@@ -22,9 +22,15 @@ class Board:
         )
         self.puzzle = ChainMap(self.base_puzzle)
     
+    def _remove_matches(self, column):
+        for i in range(1, len(self.puzzle[column])):
+            if self.puzzle[column][i] != self.puzzle[column][0]:
+                return self.puzzle[column][i:]
+        return []
+    
     def click(self, column):
-        "Click on a column to remove the bottom cell."
-        new_col = self.puzzle[column][1:]
+        "Click on a column to remove the bottom cell and same-column same-color cells."
+        new_col = self._remove_matches(column)
         self.puzzle = self.puzzle.new_child({column: new_col})
     
     def unclick(self):
